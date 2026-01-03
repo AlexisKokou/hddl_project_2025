@@ -294,7 +294,7 @@ def multi_evaluation(model, test_loader, mapping,type = "catdog",top_k = 5, devi
             outputs = model(images)
             cls_outs = outputs[0]
             seg_outs = outputs[1].squeeze(1)
-            predict = int(torch.argmax(F.softmax(cls_outs, dim = 1), 1).cpu())
+            predict = torch.argmax(F.softmax(cls_outs, dim = 1), 1).cpu()
             pred.append(predict)
             true.append(true_batch)
             for i in range(images.shape[0]):
@@ -306,6 +306,43 @@ def multi_evaluation(model, test_loader, mapping,type = "catdog",top_k = 5, devi
                     'dice': dice
                 })
     df = pd.DataFrame(results)
+    df['True label'] = df['True label'].apply(lambda x: int(x) if isinstance(x, torch.Tensor) else x)
+    df['Pred label'] = df['Pred label'].apply(lambda x: int(x) if isinstance(x, torch.Tensor) else x)
+
+    overall_stats = {
+        'Total samples': len(df),
+        'IoU mean': df['iou'].mean(),
+        'IoU std': df['iou'].std(),
+        'Dice mean': df['dice'].mean(),
+        'Dice std': df['dice'].std(),
+        'Classification accuracy': (df['True label'] == df['Pred label']).mean()
+    }
+
+    class_stats = df.groupby('True label').agg({
+        'iou': ['mean', 'std', 'min', 'max'],
+        'dice': ['mean', 'std', 'min', 'max']
+    }).round(4)
+
+    misclassified = df[df['True label'] != df['Pred label']]
+    misclass_stats = {
+        'Misclassified count': len(misclassified),
+        'Misclassified IoU mean': misclassified['iou'].mean() if len(misclassified) > 0 else None,
+        'Misclassified Dice mean': misclassified['dice'].mean() if len(misclassified) > 0 else None
+    }
+
+    print("OVERALL METRICS")
+    print("*" * 50)
+    for k, v in overall_stats.items():
+        print(f"{k}: {v:.4f}" if isinstance(v, float) else f"{k}: {v}")
+    
+    print("PER-CLASS METRICS")
+    print("*" * 50)
+    print(class_stats)
+
+    print("MISCLASSIFICATION ANALYSIS")
+    print("*" * 50)
+    for k, v in misclass_stats.items():
+        print(f"{k}: {v:.4f}" if isinstance(v, float) and v is not None else f"{k}: {v}")
     return df
 def evaluate_segmentation(model, test_loader, device="cuda"):
     model.eval()

@@ -118,6 +118,7 @@ def custom_segmentation(batch):
     
     for item in batch:
         img, (lbl, fam), _, mask = item 
+        mask = mask.float()
         images.append(img)
         masks.append(mask)
         families.append(fam) 
