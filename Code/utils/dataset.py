@@ -71,7 +71,10 @@ class CatDogDataset(Dataset):
 
         mask_path = os.path.join(self.mask_path, image_name + '.png')
         mask = cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE) if os.path.exists(mask_path) else None
-        mask = (mask == 1).astype(np.float32)
+        if mask is not None:
+            mask = np.where(mask == 2, 0, mask)
+            mask = np.where(mask == 3, 1, mask)
+        #mask = (mask == 1).astype(np.float32)
         xml_path = os.path.join(self.frame_path, image_name + ".xml")
         if os.path.exists(xml_path):
             anno = Annotation(xml_path)

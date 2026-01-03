@@ -13,10 +13,8 @@ import tqdm
 import plotly.graph_objects as go
 def show_image(image, label, anno, mask):
     num_plots = 1  
-    if anno is not None:
-        num_plots += 1
     if mask is not None:
-        num_plots += 1
+        num_plots += 2  # mask + overlap
     
     fig, axes = plt.subplots(1, num_plots, figsize=(num_plots * 3.5, 5))
     if num_plots == 1:
@@ -29,18 +27,16 @@ def show_image(image, label, anno, mask):
     axes[idx].set_title('Image')
     idx += 1
     
-    if anno is not None:
-        axes[idx].imshow(image)
-        x1, y1, x2, y2 = anno
-        rect = patches.Rectangle((x1, y1), x2-x1, y2-y1, linewidth=3, edgecolor='red', facecolor='none')
-        axes[idx].add_patch(rect)
-        axes[idx].axis('off')
-        axes[idx].set_title('Image with Bounding Box')
-        idx += 1
     if mask is not None:
         axes[idx].imshow(mask, cmap='gray')
         axes[idx].axis('off')
         axes[idx].set_title('Mask')
+        idx += 1
+        
+        axes[idx].imshow(image)
+        axes[idx].imshow(mask, cmap='jet', alpha=0.4)
+        axes[idx].axis('off')
+        axes[idx].set_title('Image + Mask Overlay')
     
     fig.suptitle(f'Breed: {label[0]}, Family: {label[1]}', fontsize=16)
     plt.tight_layout()
@@ -311,3 +307,28 @@ def multi_evaluation(model, test_loader, mapping,type = "catdog",top_k = 5, devi
                 })
     df = pd.DataFrame(results)
     return df
+def evaluate_segmentation(model, test_loader, device="cuda"):
+    model.eval()
+    results = []
+    
+    with torch.no_grad():
+        for images, (labels, families), masks in tqdm.tqdm(test_loader):
+            images = images.to(device)
+            masks = masks.to(device)
+            
+            outputs = model(images)
+            
+            for i in range(images.size(0)):
+                pred_mask = outputs[i, 0]
+                true_mask = masks[i]
+                
+                iou, dice = calculate_metrics_seg(pred_mask, true_mask)
+                
+                results.append({
+                    'label': labels[i],
+                    'family': families[i],
+                    'iou': iou,
+                    'dice': dice
+                })
+    
+    return pd.DataFrame(results)
