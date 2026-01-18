@@ -12,6 +12,7 @@ import numpy as np
 import tqdm
 import plotly.graph_objects as go
 def show_image(image, label, anno, mask):
+    """Display an image with its label, annotations, and mask."""
     num_plots = 1  
     if mask is not None:
         num_plots += 2  # mask + overlap
@@ -43,6 +44,7 @@ def show_image(image, label, anno, mask):
     plt.show()
     
 def denormalize(tensor, mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]):
+    """Denormalize a tensor image."""
     tensor = tensor.clone()
     for t, m, s in zip(tensor, mean, std):
         t.mul_(s).add_(m)  
@@ -50,6 +52,7 @@ def denormalize(tensor, mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]):
 
 
 def display_classification(model, test_loader, num_breed=None, type="catdog", device="cuda"):
+    """Display classification results for a batch of images."""
     batch = next(iter(test_loader))
     images, (breeds, families) = batch
     
@@ -80,6 +83,7 @@ def display_classification(model, test_loader, num_breed=None, type="catdog", de
     plt.show()
 
 def display_segmentation(model, test_loader, device = 'cuda', threshold = 0.5):
+    """Display segmentation results for a batch of images."""
     batch = next(iter(test_loader))
     images,_, masks = batch
     model.eval()
@@ -113,6 +117,7 @@ def display_segmentation(model, test_loader, device = 'cuda', threshold = 0.5):
 
 
 def display_heatmap_breed(all_trues,all_preds,breed_names ):
+    """Display a heatmap of breed classification results."""
     accuracy = accuracy_score(all_trues, all_preds)
     print(f'Accuracy: {accuracy:.2f}')
     cm = confusion_matrix(all_trues, all_preds)
@@ -126,6 +131,7 @@ def display_heatmap_breed(all_trues,all_preds,breed_names ):
 
 
 def analyze_breed_classification(all_trues, all_preds, num_breed, top_k=5):
+    """Analyze breed classification results."""
     cm = confusion_matrix(all_trues, all_preds)
     confusions = []
     for i in range(len(cm)):
@@ -158,6 +164,7 @@ def analyze_breed_classification(all_trues, all_preds, num_breed, top_k=5):
 
 
 def calculate_metrics_seg(pred_mask, true_mask, threshold=0.5):
+    """Calculate IoU and Dice coefficient for segmentation masks."""
     pred_mask = pred_mask.detach().cpu().numpy()
     true_mask = true_mask.detach().cpu().numpy()
 
@@ -176,6 +183,7 @@ def calculate_metrics_seg(pred_mask, true_mask, threshold=0.5):
 
 
 def show_table(df, title):
+    """Display a DataFrame as a table using Plotly."""
     fig = go.Figure(data=[go.Table(
         header=dict(
             values=list(df.columns),
@@ -221,6 +229,7 @@ def catdog_evaluation(model, test_catdog_loader, device = "cuda"):
     print(f"F1 score: {f1_score_}") 
 
 def breed_evaluation(model, test_loader, breed_num,num_breed,top_k = 5, device = "cuda"):
+    """Evaluate breed classification performance."""
     model.eval()
     pred = []
     true = []
@@ -276,6 +285,7 @@ def display_multitask(model, test_loader, inv_mapping,n_images = 4,type = "catdo
     plt.show()   
 
 def multi_evaluation(model, test_loader, mapping,type = "catdog",top_k = 5, device = "cuda"):
+    """Evaluate multitask classification and segmentation performance."""
     model.eval()
     pred = []
     true = []
@@ -345,6 +355,7 @@ def multi_evaluation(model, test_loader, mapping,type = "catdog",top_k = 5, devi
         print(f"{k}: {v:.4f}" if isinstance(v, float) and v is not None else f"{k}: {v}")
     return df
 def evaluate_segmentation(model, test_loader, device="cuda"):
+    """Evaluate segmentation performance on the test dataset."""
     model.eval()
     results = []
     
