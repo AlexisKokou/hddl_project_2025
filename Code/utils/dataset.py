@@ -6,6 +6,7 @@ import pandas as pd
 import torch
 import numpy as np
 class Annotation:
+    """Parse XML annotation files to extract image and bounding box information."""
     def __init__(self, filename):
         self.filename = filename
         tree = ET.parse(self.filename)
@@ -22,6 +23,7 @@ class Annotation:
         self.ymax = int(bndbox.find('ymax').text)
 
 class CatDogDataset(Dataset):
+    """Custom Dataset for Cat and Dog images with breed and family labels, bounding boxes, and masks."""
     def __init__(self, image_path, frame_path, mask_path):
 
         self.image_path = image_path
@@ -102,6 +104,7 @@ class CatDogDataset(Dataset):
         return outs
 
 def custom_classifier(batch):
+    """Custom collate function for classifier batches."""
     images, labels, families= [], [], []
     
     for item in batch:
@@ -114,6 +117,7 @@ def custom_classifier(batch):
             (labels, torch.tensor(families)))
 
 def custom_segmentation(batch):
+    """Custom collate function for segmentation batches."""
     images, masks,labels, families= [], [], [], []
     
     for item in batch:

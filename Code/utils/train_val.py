@@ -4,6 +4,7 @@ import torch.nn as nn
 from torch.nn.utils import clip_grad_norm_
 #from typing import Literal
 def train_catdog_classifier(model,train_loader, criterion,optimizer,scheduler, epochs = 10, lr= 1e-4, device = "cuda" ):
+    """Train a cat/dog classifier model."""
     for epoch in range(epochs):
         total_loss = 0
         model.train()
@@ -24,6 +25,7 @@ def train_catdog_classifier(model,train_loader, criterion,optimizer,scheduler, e
         scheduler.step(avg_loss)
     
 def train_breed_classifier(model,train_loader, criterion,optimizer,scheduler, get_breed_num, epochs = 10, lr= 1e-4, device = "cuda" ):
+    """Train a breed classifier model."""
     for epoch in range(epochs):
         total_loss = 0
         model.train()
@@ -46,6 +48,7 @@ def train_breed_classifier(model,train_loader, criterion,optimizer,scheduler, ge
 
 
 def train_unet(model, train_loader, criterion, optimizer, scheduler, epochs=50, lr=1e-4, device='cuda'):
+    """Train a U-Net segmentation model."""
     model = model.to(device)
     for epoch in range(epochs):
         total_loss = 0
@@ -65,6 +68,7 @@ def train_unet(model, train_loader, criterion, optimizer, scheduler, epochs=50, 
         avg_loss = total_loss / len(train_loader)
         scheduler.step(avg_loss)
 def train_multimodel(model, train_loader, criterion, optimizer, scheduler,mapping, type_cls = "catdog", epochs=50, lr=1e-4, device='cuda'):
+    """Train a multitask model for classification and segmentation."""
     model = model.to(device)
     for epoch in range(epochs):
         total_loss = 0
