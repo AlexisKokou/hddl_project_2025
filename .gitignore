@@ -1,0 +1,6 @@
+/data
+/Data
+trained models/
+/*_fashionmnist_data/
+/lightning_logs
+/runs_vae_cvae
