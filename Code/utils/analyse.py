@@ -161,6 +161,7 @@ def analyze_breed_classification(all_trues, all_preds, num_breed, top_k=5):
     print(df.head(5).to_string(index=False))
     print("\n=== HARDLY DETECTED (Bottom 5) ===")
     print(df.tail(5).to_string(index=False))
+    return df
 
 
 def calculate_metrics_seg(pred_mask, true_mask, threshold=0.5):
@@ -247,7 +248,8 @@ def breed_evaluation(model, test_loader, breed_num,num_breed,top_k = 5, device =
     all_preds = torch.cat(pred).cpu().numpy()
     all_trues = [x for sublist in true for x in sublist]
     display_heatmap_breed(all_preds=all_preds, all_trues= all_trues, breed_names= breed_num.keys())
-    analyze_breed_classification(all_trues, all_preds, num_breed, top_k=top_k)
+    df  = analyze_breed_classification(all_trues, all_preds, num_breed, top_k=top_k)
+    return df
 
 def display_multitask(model, test_loader, inv_mapping,n_images = 4,type = "catdog", device = 'cuda',  threshold = 0.5):
     batch = next(iter(test_loader))
