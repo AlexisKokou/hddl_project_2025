@@ -1,0 +1,15 @@
+# Data
+**/data/
+**/Data/
+*_fashionmnist_data/
+
+# Models
+trained models/
+*.pth
+
+# Logs
+lightning_logs/
+runs_vae_cvae/
+
+# Outputs
+*.png
