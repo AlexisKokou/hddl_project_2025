@@ -1,6 +1,6 @@
 # Data
-/data/
-/Data/
+**/data/
+**/Data/
 *_fashionmnist_data/
 
 # Models
